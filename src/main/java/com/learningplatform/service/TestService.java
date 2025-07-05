@@ -1,12 +1,15 @@
 package com.learningplatform.service;
 
 import com.learningplatform.dto.MessageResponse;
+import com.learningplatform.dto.QuestionDTO;
 import com.learningplatform.dto.TestSubmissionRequest;
 import com.learningplatform.model.Course;
+import com.learningplatform.model.Question;
 import com.learningplatform.model.TestResult;
 import com.learningplatform.model.User;
 import com.learningplatform.model.UserCourseEnrollment;
 import com.learningplatform.repository.CourseRepository;
+import com.learningplatform.repository.QuestionRepository;
 import com.learningplatform.repository.TestResultRepository;
 import com.learningplatform.repository.UserCourseEnrollmentRepository;
 import com.learningplatform.repository.UserRepository;
@@ -43,6 +46,9 @@ public class TestService {
     private CourseRepository courseRepository;
     
     @Autowired
+    private QuestionRepository questionRepository;
+    
+    @Autowired
     private UserCourseEnrollmentRepository enrollmentRepository;
     
     /**
@@ -67,13 +73,34 @@ public class TestService {
                         .body(new MessageResponse("User not enrolled in this course", 400));
             }
             
+            // Get all questions for the course
+            List<Question> questions = questionRepository.findActiveByCourseId(course.getId());
+            
+            if (questions.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("No questions found for this course", 400));
+            }
+            
+            // Calculate score based on answers
+            int totalQuestions = questions.size();
+            int correctAnswers = 0;
+            
+            for (Question question : questions) {
+                String userAnswer = testRequest.getAnswers().get(question.getId());
+                if (userAnswer != null && question.isCorrect(userAnswer)) {
+                    correctAnswers++;
+                }
+            }
+            
+            double score = totalQuestions > 0 ? (double) correctAnswers / totalQuestions * 100 : 0;
+            
             // Create test result
             TestResult testResult = new TestResult(
                     user, 
                     course, 
-                    testRequest.getScore(),
-                    testRequest.getTotalQuestions(),
-                    testRequest.getCorrectAnswers(),
+                    score,
+                    totalQuestions,
+                    correctAnswers,
                     testRequest.getTestDurationMinutes()
             );
             
@@ -225,6 +252,63 @@ public class TestService {
     private UserPrincipal getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (UserPrincipal) authentication.getPrincipal();
+    }
+    
+    /**
+     * Get test questions for a course
+     */
+    public ResponseEntity<?> getTestQuestions(Long courseId) {
+        try {
+            Optional<Course> courseOpt = courseRepository.findById(courseId);
+            if (!courseOpt.isPresent()) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("Course not found", 404));
+            }
+            
+            Course course = courseOpt.get();
+            List<Question> questions = questionRepository.findActiveByCourseId(courseId);
+            
+            if (questions.isEmpty()) {
+                return ResponseEntity.ok()
+                        .body(new ApiResponse<>("No questions available for this course", 200, List.of()));
+            }
+            
+            // Create a simplified version of questions without the correct answers
+            List<QuestionDTO> questionDTOs = questions.stream()
+                    .map(q -> new QuestionDTO(q))
+                    .toList();
+            
+            logger.info("Retrieved {} questions for course: {}", questionDTOs.size(), course.getTitle());
+            return ResponseEntity.ok()
+                    .body(new ApiResponse<>("Questions retrieved successfully", 200, questionDTOs));
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving questions for course {}: {}", courseId, e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new MessageResponse("Error retrieving questions", 500));
+        }
+    }
+    
+    /**
+     * API Response wrapper
+     */
+    public static class ApiResponse<T> {
+        private String message;
+        private int status;
+        private T data;
+        private String timestamp;
+        
+        public ApiResponse(String message, int status, T data) {
+            this.message = message;
+            this.status = status;
+            this.data = data;
+            this.timestamp = java.time.LocalDateTime.now().toString();
+        }
+        
+        public String getMessage() { return message; }
+        public int getStatus() { return status; }
+        public T getData() { return data; }
+        public String getTimestamp() { return timestamp; }
     }
     
     // Helper class for test statistics

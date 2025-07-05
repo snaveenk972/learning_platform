@@ -30,6 +30,14 @@ public class TestController {
     }
     
     /**
+     * Get test questions for a course
+     */
+    @GetMapping("/course/{courseId}/questions")
+    public ResponseEntity<?> getTestQuestions(@PathVariable Long courseId) {
+        return testService.getTestQuestions(courseId);
+    }
+    
+    /**
      * Get user's test results
      */
     @GetMapping("/results")

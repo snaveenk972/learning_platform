@@ -22,11 +22,14 @@ A comprehensive backend application for a learning management system built with 
 - **Status Management**: Automatic status updates (Learning → Completed)
 - **Enrollment Statistics**: Detailed analytics on user learning progress
 
-### 4. Assessment & Testing
-- **Test Submission**: Submit test results with scoring and timing
-- **Performance Tracking**: Track test scores, pass/fail status, and attempts
+### 4. Assessment & Testing System
+- **Question Bank**: Each course has 5 multiple-choice questions with explanations
+- **Test Taking**: Interactive test interface with timer and progress tracking
+- **Auto-Grading**: Automatic scoring based on correct answers (A, B, C, D format)
+- **Test Results**: Comprehensive results with score, pass/fail status, and timing
 - **Achievement System**: Automatic course completion based on test results (70% passing grade)
 - **Test Analytics**: Comprehensive statistics on test performance
+- **Question Security**: Correct answers are not exposed to frontend during test-taking
 
 ### 5. Achievement System
 - **Course Completion**: Courses marked as completed upon successful test completion
@@ -173,14 +176,43 @@ Get enrollment statistics
 
 ### Test Endpoints (Authenticated)
 
+#### GET `/api/tests/course/{courseId}/questions`
+Get test questions for a course
+```json
+// Response format:
+{
+  "message": "Questions retrieved successfully",
+  "status": 200,
+  "data": [
+    {
+      "id": 1,
+      "questionText": "What is the main purpose of the 'public static void main(String[] args)' method in Java?",
+      "options": [
+        "It's the entry point of a Java application",
+        "It creates new objects",
+        "It handles exceptions",
+        "It connects to databases"
+      ],
+      "explanation": "The main method is the entry point where the JVM starts executing the program.",
+      "difficultyLevel": "BEGINNER",
+      "points": 1
+    }
+  ]
+}
+```
+
 #### POST `/api/tests/submit`
-Submit test results
+Submit test answers with automatic grading
 ```json
 {
   "courseId": 1,
-  "score": 85.5,
-  "totalQuestions": 20,
-  "correctAnswers": 17,
+  "answers": {
+    "1": "A",
+    "2": "B",
+    "3": "C",
+    "4": "A",
+    "5": "D"
+  },
   "testDurationMinutes": 30
 }
 ```
@@ -224,6 +256,22 @@ Get highest score for course
 - `difficulty_level`
 - `category`
 - `instructor_name`
+- `is_active`
+- `created_at`
+- `updated_at`
+
+### Questions Table
+- `id` (Primary Key)
+- `course_id` (Foreign Key)
+- `question_text`
+- `option_a`
+- `option_b`
+- `option_c`
+- `option_d`
+- `correct_answer` (A, B, C, or D)
+- `explanation`
+- `difficulty_level`
+- `points`
 - `is_active`
 - `created_at`
 - `updated_at`

@@ -23,10 +23,15 @@ Your comprehensive learning platform backend is now **successfully built and run
    - Automatic status management (Learning → Completed)
 
 4. **✅ Assessment & Testing System**
-   - Test submission with scoring and timing
+   - **NEW**: Interactive question bank with 5 questions per course (60 total questions)
+   - **NEW**: Multiple-choice questions with A, B, C, D format
+   - **NEW**: Auto-grading system with secure answer validation
+   - **NEW**: Question API endpoint for real-time test delivery
+   - **NEW**: Answer submission with automatic scoring
    - 70% passing grade requirement
    - Automatic course completion on test success
    - Comprehensive test analytics
+   - **Security**: Correct answers never exposed to frontend
 
 5. **✅ Achievement System**
    - Completed courses tracking
@@ -109,6 +114,26 @@ $loginBody = @{
 
 $loginResponse = Invoke-RestMethod -Uri "http://localhost:8080/api/auth/signin" -Method POST -Body $loginBody -ContentType "application/json"
 $token = $loginResponse.accessToken
+
+# Test NEW Question Functionality
+# Get questions for course 1 (Java Programming)
+$headers = @{ Authorization = "Bearer $token" }
+$questions = Invoke-RestMethod -Uri "http://localhost:8080/api/tests/course/1/questions" -Method GET -Headers $headers
+
+# Submit test answers (auto-graded)
+$testAnswers = @{
+    courseId = 1
+    answers = @{
+        "1" = "A"
+        "2" = "B" 
+        "3" = "A"
+        "4" = "B"
+        "5" = "C"
+    }
+    testDurationMinutes = 15
+} | ConvertTo-Json
+
+$testResult = Invoke-RestMethod -Uri "http://localhost:8080/api/tests/submit" -Method POST -Body $testAnswers -ContentType "application/json" -Headers $headers
 ```
 
 ## 📁 Project Structure
@@ -163,7 +188,9 @@ Learning_portal/
 - `POST /api/enrollments/enroll` - Enroll in courses
 - `GET /api/enrollments/learning` - Get learning courses
 - `GET /api/enrollments/achievements` - Get completed courses
-- `POST /api/tests/submit` - Submit test results
+- **NEW**: `GET /api/tests/course/{courseId}/questions` - Get test questions
+- **NEW**: `POST /api/tests/submit` - Submit test answers (auto-graded)
+- `GET /api/tests/results` - Get test results
 - `GET /api/tests/statistics` - Get test analytics
 
 ## 💫 Success Metrics

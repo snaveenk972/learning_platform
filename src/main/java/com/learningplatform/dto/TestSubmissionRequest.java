@@ -1,35 +1,27 @@
 package com.learningplatform.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
  * Data Transfer Object for test submission
- * Contains test results and performance metrics
+ * Contains answers to questions for automatic scoring
  */
 public class TestSubmissionRequest {
     
     @NotNull(message = "Course ID is required")
     private Long courseId;
     
-    @NotNull(message = "Score is required")
-    @Min(value = 0, message = "Score cannot be less than 0")
-    @Max(value = 100, message = "Score cannot be more than 100")
-    private Double score;
+    @NotNull(message = "Answers are required")
+    private Map<Long, String> answers; // questionId -> selectedAnswer (A, B, C, D)
     
-    private Integer totalQuestions;
-    private Integer correctAnswers;
     private Integer testDurationMinutes;
     
     public TestSubmissionRequest() {}
     
-    public TestSubmissionRequest(Long courseId, Double score, Integer totalQuestions, 
-                               Integer correctAnswers, Integer testDurationMinutes) {
+    public TestSubmissionRequest(Long courseId, Map<Long, String> answers, Integer testDurationMinutes) {
         this.courseId = courseId;
-        this.score = score;
-        this.totalQuestions = totalQuestions;
-        this.correctAnswers = correctAnswers;
+        this.answers = answers;
         this.testDurationMinutes = testDurationMinutes;
     }
     
@@ -37,14 +29,8 @@ public class TestSubmissionRequest {
     public Long getCourseId() { return courseId; }
     public void setCourseId(Long courseId) { this.courseId = courseId; }
     
-    public Double getScore() { return score; }
-    public void setScore(Double score) { this.score = score; }
-    
-    public Integer getTotalQuestions() { return totalQuestions; }
-    public void setTotalQuestions(Integer totalQuestions) { this.totalQuestions = totalQuestions; }
-    
-    public Integer getCorrectAnswers() { return correctAnswers; }
-    public void setCorrectAnswers(Integer correctAnswers) { this.correctAnswers = correctAnswers; }
+    public Map<Long, String> getAnswers() { return answers; }
+    public void setAnswers(Map<Long, String> answers) { this.answers = answers; }
     
     public Integer getTestDurationMinutes() { return testDurationMinutes; }
     public void setTestDurationMinutes(Integer testDurationMinutes) { this.testDurationMinutes = testDurationMinutes; }

@@ -182,17 +182,29 @@ spring-boot-starter-test        # Testing framework
   - Progress summaries
 
 ### 4. Assessment & Testing System
-- **Test Submission**
-  - Score recording
-  - Question analytics
-  - Duration tracking
-  - Multiple attempts support
+- **Question Bank Management**
+  - 5 multiple-choice questions per course
+  - Secure question storage with correct answers
+  - Question difficulty levels and point systems
+  - Explanations for each question
 
-- **Evaluation System**
-  - 70% passing grade requirement
-  - Automatic course completion
-  - Performance analytics
-  - Success tracking
+- **Interactive Testing**
+  - Real-time question delivery via REST API
+  - Multiple choice format (A, B, C, D)
+  - Timer-based test sessions
+  - Progress tracking during tests
+
+- **Auto-Grading System**
+  - Automatic answer evaluation
+  - Score calculation based on correct answers
+  - Pass/fail determination (70% threshold)
+  - Duration tracking and recording
+
+- **Test Security**
+  - Correct answers not exposed to frontend
+  - Secure answer submission and validation
+  - Prevention of answer tampering
+  - Session-based test integrity
 
 - **Test Analytics**
   - Individual performance metrics
@@ -328,7 +340,34 @@ Authorization: Bearer {token}
 
 ### Test Endpoints (Authenticated)
 
-#### Submit Test Results
+#### Get Test Questions
+```http
+GET /tests/course/{courseId}/questions
+Authorization: Bearer {token}
+
+Response:
+{
+  "message": "Questions retrieved successfully",
+  "status": 200,
+  "data": [
+    {
+      "id": 1,
+      "questionText": "What is the main purpose of the 'public static void main(String[] args)' method in Java?",
+      "options": [
+        "It's the entry point of a Java application",
+        "It creates new objects", 
+        "It handles exceptions",
+        "It connects to databases"
+      ],
+      "explanation": "The main method is the entry point where the JVM starts executing the program.",
+      "difficultyLevel": "BEGINNER",
+      "points": 1
+    }
+  ]
+}
+```
+
+#### Submit Test Answers
 ```http
 POST /tests/submit
 Authorization: Bearer {token}
@@ -336,9 +375,13 @@ Content-Type: application/json
 
 {
   "courseId": 1,
-  "score": 85.5,
-  "totalQuestions": 20,
-  "correctAnswers": 17,
+  "answers": {
+    "1": "A",
+    "2": "B", 
+    "3": "C",
+    "4": "A",
+    "5": "D"
+  },
   "testDurationMinutes": 30
 }
 ```
@@ -374,18 +417,43 @@ Authorization: Bearer {token}
 │ updated_at  │         └──────────────────────┘         │ created_at  │
 └─────────────┘                    │                      │ updated_at  │
        │                           │                      └─────────────┘
-       │                           │
-       │         ┌─────────────────▼──────┐
-       │         │    TestResults         │
-       │         ├────────────────────────┤
-       └────────►│ id (PK)                │
-                 │ user_id (FK)           │
-                 │ course_id (FK)         │
-                 │ score                  │
-                 │ total_questions        │
-                 │ correct_answers        │
-                 │ test_duration_minutes  │
-                 │ passed                 │
+       │                           │                             │
+       │         ┌─────────────────▼──────┐                     │
+       │         │    TestResults         │                     │
+       │         ├────────────────────────┤                     │
+       └────────►│ id (PK)                │                     │
+                 │ user_id (FK)           │                     │
+                 │ course_id (FK)         │                     │
+                 │ score                  │                     │
+                 │ total_questions        │                     │
+                 │ correct_answers        │                     │
+                 │ test_duration_minutes  │                     │
+                 │ passed                 │                     │
+                 │ test_taken_at          │                     │
+                 │ created_at             │                     │
+                 └────────────────────────┘                     │
+                                                                │
+                         ┌─────────────────────────────────────┘
+                         │
+                         ▼
+                 ┌─────────────────────────┐
+                 │      Questions          │
+                 ├─────────────────────────┤
+                 │ id (PK)                 │
+                 │ course_id (FK)          │
+                 │ question_text           │
+                 │ option_a                │
+                 │ option_b                │
+                 │ option_c                │
+                 │ option_d                │
+                 │ correct_answer          │
+                 │ explanation             │
+                 │ difficulty_level        │
+                 │ points                  │
+                 │ is_active               │
+                 │ created_at              │
+                 │ updated_at              │
+                 └─────────────────────────┘
                  │ test_taken_at          │
                  │ created_at             │
                  └────────────────────────┘

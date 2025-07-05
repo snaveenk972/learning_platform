@@ -72,18 +72,34 @@ curl -X GET http://localhost:8080/api/enrollments/learning \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### Submit Test Results
+### Get Test Questions for a Course
+```bash
+curl -X GET http://localhost:8080/api/tests/course/1/questions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Submit Test Answers (Auto-Graded)
 ```bash
 curl -X POST http://localhost:8080/api/tests/submit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "courseId": 1,
-    "score": 85.5,
-    "totalQuestions": 20,
-    "correctAnswers": 17,
+    "answers": {
+      "1": "A",
+      "2": "B",
+      "3": "C",
+      "4": "A",
+      "5": "D"
+    },
     "testDurationMinutes": 30
   }'
+```
+
+### Get Test Results
+```bash
+curl -X GET http://localhost:8080/api/tests/results \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Update Course Progress
@@ -112,8 +128,10 @@ curl -X GET http://localhost:8080/api/tests/statistics \
 4. **Browse courses** using the course endpoints
 5. **Enroll in courses** using the enrollment endpoint
 6. **Update progress** as you learn
-7. **Submit test results** when completing courses
-8. **View achievements** and statistics
+7. **Get test questions** for a course you want to complete
+8. **Submit test answers** for automatic grading
+9. **View test results** and course completion status
+10. **View achievements** and statistics
 
 ## 5. H2 Database Console
 

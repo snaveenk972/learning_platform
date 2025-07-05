@@ -59,7 +59,8 @@ public class AuthService {
                     userDetails.getUsername(),
                     userDetails.getEmail(),
                     userDetails.getFirstName(),
-                    userDetails.getLastName()));
+                    userDetails.getLastName(),
+                    userDetails.getPhoneNumber()));
         } catch (Exception e) {
             logger.error("Authentication failed for user: {}", loginRequest.getUsernameOrEmail(), e);
             return ResponseEntity.badRequest()

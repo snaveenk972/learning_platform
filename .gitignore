@@ -1,3 +1,37 @@
+
+# Angular and build caches
+frontend/.angular/cache/
+.angular/
+dist/
+build/
+
+# Common large binary/media files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.iso
+*.dmg
+*.exe
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.psd
+*.ai
+*.sketch
+*.pdf
+*.bin
+
+# Large files directory (if you use one)
+large_files/
+
+
 # Compiled class files
 *.class
 
